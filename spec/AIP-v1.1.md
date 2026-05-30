@@ -196,15 +196,15 @@ tying it to the dock next time.
 | `task` | Yes for task packets | Task type identifier. Must be registered or namespaced custom type. |
 | `task_id` | Recommended | App-generated unique string. Required for retry packets and session tasks. |
 | `input` | Yes for most task packets | The primary data the AI operates on. Untrusted strings must be wrapped per §7. |
-| `output_format` | Yes for task packets | `text`, `json`, or `markdown`. |
-| `rules` | Recommended | Constraints on AI behaviour. Reduces format violations and preamble contamination. |
+| `output_format` | Yes for task packets | `text` or `json`. `markdown` is reserved for v1.2 — must not be used in v1.1 packets. Parsers encountering it should treat it as text and log a warning. |
+| `rules` | Recommended | Constraints on AI behaviour. Rules are free-form strings — RunPack enforces no canonical vocabulary. Apps define their own conventions; snake_case is conventional but not required. Parsers must pass rules through to the AI without modification. |
 
 ### 2.4 — Result status values
 
 | Status | Meaning |
 |---|---|
 | `ok` | Task completed. Result is usable. |
-| `partial` | Task completed but result may be incomplete. App should validate before use. |
+| `partial` | Task completed but result may be incomplete. Accept only if the receiving app can operate correctly with incomplete data. Otherwise treat as E03 and retry with a reduced payload. |
 | `refused` | Model declined to execute. Result body contains reason if available. |
 | `error` | Execution failed. Result body contains error information. |
 
