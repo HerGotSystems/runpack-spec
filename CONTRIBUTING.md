@@ -1,6 +1,8 @@
-# Contributing to AIP
+# Contributing to RunPack
 
-AIP is a public draft standard. Contributions are welcome and the process is deliberately lightweight for v1.x.
+RunPack is a public draft standard. Contributions are welcome and the process is deliberately lightweight for v1.x.
+
+AIP remains only as the v1.x compatibility layer and may still appear in legacy file paths until the file-path migration is complete.
 
 ---
 
@@ -19,7 +21,7 @@ A new entry for the standard task type registry. See the full process below.
 Changes that would require a MAJOR version increment. See the bar for these below.
 
 ### Examples and worked implementations
-Additional worked examples (new domains, edge cases, language-specific parsers). Open a PR against the `examples/` directory.
+Additional worked examples, new domains, edge cases, language-specific parsers, validators, bridge tools, or real apps using RunPack. Open a PR against the relevant directory.
 
 ---
 
@@ -32,9 +34,9 @@ Task type proposals are the most common contribution. The bar is intentionally l
 Label it `task-type-proposal`. Include:
 
 - **Type identifier** — snake_case, descriptive, domain-neutral where possible
-- **Category** — one of: Game, Narrative, Music, Visual, Education, Text, Utility, Session, or propose a new category
+- **Category** — one of: Game, Narrative, Music, Visual, Education, Text, Utility, Session, Evaluation, Systems, or propose a new category
 - **Required input fields** — name, type, and whether mandatory or optional
-- **Output format** — text, json, or markdown
+- **Output format** — text or json in v1.1
 - **Return schema** — for JSON mode, the fields the result must contain
 - **Worked example** — a complete task packet and a plausible result packet
 - **Link to implementation** — a public repository, live tool, or documented usage
@@ -69,7 +71,7 @@ Requirements before a MAJOR proposal can proceed:
 1. Open an issue with label `major-proposal`
 2. Clearly document what breaks under the current spec and why it cannot be solved with a MINOR addition
 3. Provide a full draft of the changed sections
-4. Demonstrate at least one independent (non-steward) implementation of the proposed changes
+4. Demonstrate at least one independent non-steward implementation of the proposed changes
 5. Allow a minimum 60-day discussion period
 
 MAJOR proposals that lack independent implementation or clear justification for the breaking change will be closed without ratification.
@@ -78,20 +80,20 @@ MAJOR proposals that lack independent implementation or clear justification for 
 
 ## Opening a pull request
 
-For spec text changes: PRs against `spec/AIP-v1.1.md`. Changes must be minimal, targeted, and reference an open issue.
+For spec text changes: PRs against `spec/AIP-v1.1.md` until the legacy path migration is complete. Changes must be minimal, targeted, and reference an open issue.
 
 For examples: PRs against `examples/`. No issue required for new worked examples. Follow the existing file naming convention.
 
-For the README: only open README PRs if something is factually incorrect. The README reflects the spec — change the spec first.
+For the README: only open README PRs if something is factually incorrect or materially improves first-time understanding. The README should stay short and adoption-oriented.
 
 ---
 
 ## Code of conduct
 
-AIP is a technical standard. Discussions should be specific, referenced, and constructive. Proposals are evaluated on technical merit, not on who proposes them.
+RunPack is a technical standard. Discussions should be specific, referenced, and constructive. Proposals are evaluated on technical merit, not on who proposes them.
 
 ---
 
 ## Questions
 
-Open an issue with the label `question`. If you are building something on AIP and want to share it, open an issue with the label `built-on-aip`.
+Open an issue with the label `question`. If you are building something on RunPack and want to share it, open an issue with the label `built-on-runpack`.
