@@ -1,6 +1,6 @@
 # Security Policy
 
-AIP is a document/specification repo, but security still matters.
+RunPack is a specification repo, but security still matters.
 
 ## Report security concerns for
 
