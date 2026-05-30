@@ -8,82 +8,63 @@
 
 Apps generate structured task packets.  
 Users run them with any AI they already have.  
-No app-owner API keys. No public inference costs. No vendor lock-in.
+Results can be pasted or imported back into the app.
 
-Legacy name: **AIP / AI Prompt Protocol**. Renamed to RunPack for clarity.
+No app-owner API keys. No public inference costs. No vendor lock-in.
 
 > Make a pack. Run it anywhere.
 
 ---
 
-## Repository rename status
+## 30-second explanation
 
-This repository is ready to be renamed:
-
-```text
-HerGotSystems/aip-protocol
-→ HerGotSystems/runpack-spec
-```
-
-GitHub should preserve redirects after the rename, but public docs now use **RunPack** as the primary name. AIP remains only as the v1.x compatibility layer and in legacy filenames that still need a later file-path migration.
-
----
-
-## Start here
-
-- Try the console — generate a task packet in 30 seconds
-- Landing page — what RunPack is and why it exists
-- Spec — the full packet specification
-- Examples — ready-to-use packet templates
-
----
-
-## How it works
+Most AI apps call a model API directly:
 
 ```text
-=== RUNPACK_TASK ===
-version: 1.1
-legacy_aip_version: 1.1
-aip_version: 1.1
-packet_type: runpack_task
-task: document_summary
-
-input:
-  text: [USER_INPUT]
-  ... any document ...
-  [/USER_INPUT]
-
-rules:
-  3_sentences_maximum
-  plain_language
-  no_preamble
-
-output_format: text
-=== END_RUNPACK_TASK ===
+App → API provider → AI result
 ```
 
-1. App generates a packet like this.  
-2. User pastes it into ChatGPT, Claude, Gemini, or any local model.  
-3. Result comes back in a structured format the app can read.
+RunPack flips that:
 
-That's it. No model API required by the app. Works with any AI, now and in the future.
+```text
+App → RunPack packet → User's AI → Result → App
+```
+
+The app does not need to host inference. It only needs to create a clear task packet and understand the result.
 
 ---
 
-## Why this exists
+## Minimal packet
 
-Most "AI apps" are wrappers around a model API. That creates the same failure pattern every time:
+```json
+{
+  "runpack_version": "1.1",
+  "legacy_aip_version": "1.1",
+  "aip_version": "1.1",
+  "packet_type": "runpack_task",
+  "task_id": "doc-001",
+  "task": "document_summary",
+  "input": {
+    "text": "[USER_INPUT]\nPaste text here.\n[/USER_INPUT]"
+  },
+  "rules": ["3_sentences_maximum", "plain_language", "no_preamble"],
+  "output_format": "text"
+}
+```
 
-- developer pays per inference
-- app inherits vendor risk
-- product breaks when APIs change
-- user has no say in which AI they trust
+The compatibility fields are deliberate. **RunPack is the public name. AIP remains the v1.x compatibility layer.**
 
-RunPack flips the model.
+---
 
-The app emits a packet. The user's AI executes it. The result comes back structured.
+## Who this is for
 
-The AI is already in the user's pocket — RunPack just gives it a job to do.
+RunPack is useful when you are building:
+
+- small public tools that should not pay for everyone else's AI usage
+- browser-first apps with manual or semi-automated AI handoff
+- educational tools, creative tools, analysis tools, games, and workflow generators
+- software that should work with ChatGPT, Claude, Gemini, local models, and future systems
+- apps where the user should see and control what is sent to AI
 
 ---
 
@@ -109,36 +90,14 @@ RunPack is not:
 
 ---
 
-## Tools using RunPack
+## Quick start for app builders
 
-Early / in-progress use:
-
-- **HumanX** — RunPack-first claim analysis packets with AIP legacy route retained
-- **Omniforge System Forge** — candidate BYO-AI packet workflow for system generation and framework expansion
-
-Add your tool here when it can generate or consume RunPack packets.
-
----
-
-## What's in this repo
-
-```text
-docs/
-  index.html          — front door (GitHub Pages entry point)
-  console.html        — interactive RunPack generator
-  AIP-landing.html    — legacy path, RunPack-first landing page
-spec/
-  AIP-v1.1.md         — legacy filename, canonical RunPack v1.1 spec until path migration
-examples/
-  basic-task.txt      — minimal block format task
-  json-mode.json      — JSON mode task and result
-  stateful-session.txt — multi-turn session with history
-  retry-packet.txt    — retry packets for all six error codes
-reference/
-  AIP-v1.1-spec.html  — legacy path, RunPack-first rendered spec
-```
-
-File names still contain `AIP` during the transition. Public wording is now RunPack.
+1. Pick a task type, such as `document_summary`, `classify`, `rewrite`, or a custom namespaced type.
+2. Put the user's data inside `input`.
+3. Put behavioural constraints inside `rules`.
+4. Define the expected output with `output_format` and, for JSON, a `return` schema.
+5. Let the user copy/open the packet in their AI.
+6. Validate the result before importing it back.
 
 ---
 
@@ -168,11 +127,50 @@ com.yourapp.task_name
 
 ---
 
+## Tools using RunPack
+
+Early / in-progress use:
+
+- **HumanX** — RunPack-first claim analysis packets with AIP legacy route retained
+- **Omniforge System Forge** — candidate BYO-AI packet workflow for system generation and framework expansion
+
+Add your tool here when it can generate or consume RunPack packets.
+
+---
+
+## What's in this repo
+
+```text
+docs/
+  index.html           — front door / GitHub Pages entry point
+  console.html         — interactive RunPack generator
+  AIP-landing.html     — legacy path, RunPack-first landing page
+spec/
+  AIP-v1.1.md          — legacy filename, canonical RunPack v1.1 spec until path migration
+examples/
+  basic-task.txt       — minimal block format task
+  json-mode.json       — JSON mode task and result
+  stateful-session.txt — multi-turn session with history
+  retry-packet.txt     — retry packets for all six error codes
+reference/
+  AIP-v1.1-spec.html   — legacy path, RunPack-first rendered spec
+```
+
+File names still contain `AIP` during the transition. Public wording is now RunPack.
+
+---
+
+## Legacy name
+
+RunPack was previously called **AIP / AI Prompt Protocol**. The old name sounded like another abstract AI protocol. The new name describes the actual object: a pack of instructions and data that the user can run anywhere.
+
+Existing `aip_version` fields are retained for v1.x compatibility and should not be removed yet.
+
+---
+
 ## Contributing
 
 See `CONTRIBUTING.md` for the full process.
-
-Short version:
 
 - Spec issue? Open a `spec-clarification` or `spec-bug` issue.
 - New task type? Open a `task-type-proposal` issue and include a working example.
@@ -180,17 +178,9 @@ Short version:
 
 ---
 
-## Repo files
+## License
 
-| File | Purpose |
-|---|---|
-| `PROJECT_INDEX.md` | Current project map and rename status |
-| `CHANGELOG.md` | What changed and when |
-| `CONTRIBUTING.md` | How to propose changes |
-| `GOVERNANCE.md` | Stewardship and decision model |
-| `SECURITY.md` | How to report packet/spec-level risks |
-| `CODE_OF_CONDUCT.md` | How we work together |
-| `LICENSE.txt` | CC BY 4.0 — free to use and build on |
+CC BY 4.0 — free to read, use, implement, fork, and build on.
 
 ---
 
