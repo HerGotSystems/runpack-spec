@@ -154,10 +154,9 @@ com.yourapp.task_name
 
 ## Tools using RunPack
 
-Early / in-progress use:
-
-- **HumanX** — RunPack-first claim analysis packets with AIP legacy route retained
-- **Omniforge System Forge** — candidate BYO-AI packet workflow for system generation and framework expansion
+- **HumanX** — claim pressure analysis packets via RunPack
+- **Omniforge System Forge** — generates RunPack v1.1 packets 
+  for system_generation and framework_expansion via the RunPack Packet modal
 
 Add your tool here when it can generate or consume RunPack packets.
 
