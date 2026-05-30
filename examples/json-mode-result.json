@@ -1,0 +1,11 @@
+{
+  "runpack_version": "1.1",
+  "legacy_aip_version": "1.1",
+  "aip_version": "1.1",
+  "packet_type": "runpack_result",
+  "task_id": "classify-001",
+  "status": "ok",
+  "label": "shipping",
+  "confidence": 0.91,
+  "secondary_label": null
+}
