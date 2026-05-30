@@ -34,6 +34,20 @@ The app does not need to host inference. It only needs to create a clear task pa
 
 ---
 
+## Why this matters
+
+A public app with 1,000 daily active users running AI tasks
+costs the developer nothing with RunPack. The same workflow
+on a hosted API costs real money every day, whether users
+get value or not.
+
+RunPack shifts inference cost to the people who already
+chose to pay for AI — which is increasingly everyone.
+ChatGPT and Claude subscriptions are mainstream. The user
+who already has AI is the normal user now, not the exception.
+
+---
+
 ## Minimal packet
 
 ```json
@@ -65,6 +79,17 @@ RunPack is useful when you are building:
 - educational tools, creative tools, analysis tools, games, and workflow generators
 - software that should work with ChatGPT, Claude, Gemini, local models, and future systems
 - apps where the user should see and control what is sent to AI
+
+### RunPack is not the right fit if:
+
+- Your app needs sub-second AI responses — the manual-paste
+  flow adds latency by design
+- Your workflow is fully automated with no human in the loop
+- You need guaranteed output consistency across all users —
+  different AI models produce different results for the same packet
+- Your product value *is* the AI curation — if you have
+  proprietary prompting or fine-tuning that defines your product,
+  keeping that in-house makes sense
 
 ---
 
@@ -149,7 +174,8 @@ spec/
   AIP-v1.1.md          — legacy filename, canonical RunPack v1.1 spec until path migration
 examples/
   basic-task.txt       — minimal block format task
-  json-mode.json       — JSON mode task and result
+  json-mode-task.json  — JSON mode task packet
+  json-mode-result.json — JSON mode result packet
   stateful-session.txt — multi-turn session with history
   retry-packet.txt     — retry packets for all six error codes
 reference/
