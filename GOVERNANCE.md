@@ -1,6 +1,6 @@
 # Governance
 
-AIP v1.1 is published as a **public draft**.
+RunPack v1.1 is published as a **public draft**.
 
 ## Current stewardship
 
