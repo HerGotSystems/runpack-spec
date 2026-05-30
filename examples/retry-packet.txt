@@ -1,4 +1,4 @@
-# AIP Example — Retry packets for all six error codes
+# RunPack Example — Retry packets for all six error codes
 #
 # When a result fails validation, emit a retry packet instead of
 # surfacing the broken result to the app.
