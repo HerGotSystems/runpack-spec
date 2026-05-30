@@ -1,4 +1,4 @@
-# AIP Example — Stateful session (multi-turn with history pruning)
+# RunPack Example — Stateful session (multi-turn with history pruning)
 #
 # Shows: session_id, turn counter, history block, history_summary,
 #        pinned turns, role-boundary pattern for user input.
