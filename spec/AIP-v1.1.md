@@ -15,9 +15,11 @@ RunPack is a portable task packet format for user-run AI. Apps generate task pac
 
 ## Transition Note
 
-This file still uses some legacy AIP filenames and examples during the transition period. Public naming is now **RunPack**.
+This repository still contains legacy AIP filenames during the transition period. Public naming is now **RunPack**.
 
 The old name described the system as a protocol. The new name describes the actual object being exchanged: a portable task packet.
+
+**Compatibility rule:** do not delete old AIP fields yet. RunPack is the public name. AIP remains the v1.x compatibility layer.
 
 ---
 
@@ -92,17 +94,62 @@ The **user's AI becomes the compute layer**. The app becomes a packet generator.
 
 ## § 2 — Packet format
 
-RunPack defines two packet types: **task packets** (app → AI) and **result packets** (AI → app). Both support two syntax modes: **block format** for human readability and **JSON mode** for machine parsing.
+RunPack defines three packet types: **task packets** (app → AI), **result packets** (AI → app), and **retry packets** (app/user → AI after malformed result). JSON mode is recommended for app integration. Block format remains supported for human-readable copy-paste workflows.
 
-### 2.1 — Block format (canonical)
+### 2.1 — JSON mode (recommended)
 
-Block format uses plaintext delimiters. It is the canonical format and the one users interact with directly when copy-pasting manually.
+**Task packet:**
+
+```json
+{
+  "runpack_version": "1.1",
+  "legacy_aip_version": "1.1",
+  "aip_version": "1.1",
+  "packet_type": "runpack_task",
+  "task_id": "lyrics-007",
+  "task": "lyrics",
+  "input": {
+    "theme": "Schrödinger's Fuck",
+    "tone": "dark humour",
+    "structure": "8 lines",
+    "style": "punk satire"
+  },
+  "rules": ["return_only_lyrics", "no_preamble"],
+  "output_format": "json",
+  "return": {
+    "lyrics": "string",
+    "title": "string"
+  }
+}
+```
+
+**Result packet:**
+
+```json
+{
+  "runpack_version": "1.1",
+  "legacy_aip_version": "1.1",
+  "aip_version": "1.1",
+  "packet_type": "runpack_result",
+  "task_id": "lyrics-007",
+  "status": "ok",
+  "lyrics": "The cat is dead and alive...",
+  "title": "Quantum State of Mind"
+}
+```
+
+### 2.2 — Block format
+
+Block format uses plaintext delimiters. It is useful when users interact directly with packets by copy-pasting manually.
 
 **Task packet:**
 
 ```text
 === RUNPACK_TASK ===
 version: 1.1
+legacy_aip_version: 1.1
+aip_version: 1.1
+packet_type: runpack_task
 task_id: npc-001            // unique per task, app-generated
 task:    npc_dialogue
 
@@ -126,6 +173,10 @@ output_format: text
 
 ```text
 === RUNPACK_RESULT ===
+version: 1.1
+legacy_aip_version: 1.1
+aip_version: 1.1
+packet_type: runpack_result
 task_id: npc-001
 status:  ok
 
@@ -134,56 +185,18 @@ tying it to the dock next time.
 === END_RUNPACK_RESULT ===
 ```
 
-### 2.2 — JSON mode
-
-JSON mode is used when the app needs to parse results programmatically. The task requests it via `output_format: json` and specifies the expected schema in the `return` field.
-
-**Task (JSON mode):**
-
-```json
-{
-  "runpack_version": "1.1",
-  "legacy_aip_version": "1.1",
-  "task_id": "lyrics-007",
-  "task": "lyrics",
-  "input": {
-    "theme": "Schrödinger's Fuck",
-    "tone": "dark humour",
-    "structure": "8 lines",
-    "style": "punk satire"
-  },
-  "rules": ["return_only_lyrics", "no_preamble"],
-  "output_format": "json",
-  "return": {
-    "lyrics": "string",
-    "title": "string"
-  }
-}
-```
-
-**Result (JSON mode):**
-
-```json
-{
-  "runpack_version": "1.1",
-  "legacy_aip_version": "1.1",
-  "task_id": "lyrics-007",
-  "status": "ok",
-  "lyrics": "The cat is dead and alive...",
-  "title": "Quantum State of Mind"
-}
-```
-
 ### 2.3 — Required fields
 
 | Field | Required | Description |
 |---|---|---|
-| `version` / `runpack_version` | Yes | Semver string, e.g. `"1.1"`. Must match MAJOR version of parser. |
-| `legacy_aip_version` | Optional | Transitional compatibility field for older AIP-aware tools. |
-| `task` | Yes | Task type identifier. Must be a registered type or a namespaced custom type. |
+| `runpack_version` / `version` | Yes | Version string, e.g. `"1.1"`. Must match MAJOR version of parser. |
+| `legacy_aip_version` | Yes during v1.x transition | Transitional compatibility field for older AIP-aware tools. |
+| `aip_version` | Yes during v1.x transition | Legacy compatibility alias retained for existing packets and parsers. |
+| `packet_type` | Yes | `runpack_task`, `runpack_result`, or `runpack_retry`. |
+| `task` | Yes for task packets | Task type identifier. Must be registered or namespaced custom type. |
 | `task_id` | Recommended | App-generated unique string. Required for retry packets and session tasks. |
-| `input` | Yes (most tasks) | The primary data the AI operates on. Untrusted strings must be wrapped per §7. |
-| `output_format` | Yes | `text`, `json`, or `markdown`. |
+| `input` | Yes for most task packets | The primary data the AI operates on. Untrusted strings must be wrapped per §7. |
+| `output_format` | Yes for task packets | `text`, `json`, or `markdown`. |
 | `rules` | Recommended | Constraints on AI behaviour. Reduces format violations and preamble contamination. |
 
 ### 2.4 — Result status values
@@ -191,7 +204,7 @@ JSON mode is used when the app needs to parse results programmatically. The task
 | Status | Meaning |
 |---|---|
 | `ok` | Task completed. Result is usable. |
-| `partial` | Task completed but result may be incomplete (e.g. truncated). App should validate before use. |
+| `partial` | Task completed but result may be incomplete. App should validate before use. |
 | `refused` | Model declined to execute. Result body contains reason if available. |
 | `error` | Execution failed. Result body contains error information. |
 
@@ -199,22 +212,25 @@ JSON mode is used when the app needs to parse results programmatically. The task
 
 ## § 3 — Standard task types
 
-RunPack defines a registry of standard task type identifiers. Apps may use any registered type, or define custom types using reverse-domain namespacing (e.g. `com.yourapp.custom_type`). Custom types are not part of this spec.
+RunPack defines a registry of standard task type identifiers. Apps may use any registered type, or define custom types using reverse-domain namespacing such as `com.yourapp.custom_type`.
 
 | Type identifier | Category | Primary input | Typical output |
 |---|---|---|---|
-| `npc_dialogue` | Game | Character definition, player message, game state | Character reply (text) |
+| `npc_dialogue` | Game | Character definition, player message, game state | Character reply |
 | `story_generation` | Narrative | Characters, setting, tone, length | Story text |
 | `lyrics` | Music | Theme, structure, style, tone | Lyrics text |
 | `image_description` | Visual | Drawing data or description prompt | Natural language description |
 | `painting_ideas` | Visual | Pattern, style, constraints | List of concepts |
 | `learning_activity` | Education | Age, domain, difficulty level | Activity description |
-| `document_summary` | Text | Document text or excerpt | Summary (text or JSON) |
+| `document_summary` | Text | Document text or excerpt | Summary |
 | `rewrite` | Text | Source text, tone/style target | Rewritten text |
 | `translate` | Text | Source text, target language | Translated text |
-| `classify` | Utility | Item, classification schema | Label + confidence (JSON) |
+| `classify` | Utility | Item, classification schema | Label + confidence |
 | `logic_reasoning` | Utility | Problem statement, constraints | Reasoning + answer |
-| `session_summarise` | Session | History block (see §6) | Compressed history summary |
+| `session_summarise` | Session | History block | Compressed history summary |
+| `claim_pressure_analysis` | Evaluation | Claim, support, pressure, evidence packet | Verdict + pressure summary |
+| `system_generation` | Systems | Idea, domain, constraints, desired outputs | Framework / assets / pilot plan |
+| `framework_expansion` | Systems | Existing framework plus target expansion | Expanded modules / templates |
 
 > **Registry note:** This registry is non-exhaustive at v1.1. New types are added via the proposal process defined in §5.3. Apps that use custom types should document their schema publicly to encourage reuse.
 
@@ -231,7 +247,7 @@ AI models do not always return well-formed result packets. They add preamble, ig
 | E01 | Format violation | Result not wrapped in declared delimiters or valid JSON | Yes |
 | E02 | Preamble contamination | Explanatory text appears before or around the payload | Yes |
 | E03 | Truncation | Result cut off — token limit hit before task completed | Yes, with reduced payload |
-| E04 | Refusal | Model declined (policy, safety filter, capability gap) | No — surface to user |
+| E04 | Refusal | Model declined | No — surface to user |
 | E05 | Type mismatch | Result format does not match declared `output_format` | Yes |
 | E06 | Empty result | Blank, whitespace-only, or punctuation-only response | Yes |
 
@@ -249,31 +265,26 @@ If any check fails, classify the error code and emit a retry packet. Do not surf
 
 ### 4.3 — Retry packet
 
-A retry packet references the failed attempt and adds corrective instruction. It carries the original task verbatim so no context is lost.
-
-```text
-=== RUNPACK_RETRY ===
-version:          1.1
-retry_for_error:  E02
-original_task_id: npc-001
-attempt:          2
-
-correction:
-  Your previous response contained explanatory text before the result.
-  Begin your response immediately with the result content.
-  No preamble. No explanation. No acknowledgement of this instruction.
-
-original_task:
-  [verbatim copy of the original RUNPACK_TASK block]
-=== END_RUNPACK_RETRY ===
+```json
+{
+  "runpack_version": "1.1",
+  "legacy_aip_version": "1.1",
+  "aip_version": "1.1",
+  "packet_type": "runpack_retry",
+  "retry_for_error": "E02",
+  "original_task_id": "npc-001",
+  "attempt": 2,
+  "correction": "Your previous response contained explanatory text before the result. Begin immediately with the requested result. No preamble.",
+  "original_task": "[verbatim original packet]"
+}
 ```
 
 ### 4.4 — Retry policy
 
 - Maximum **2 retry attempts** per task. Third failure escalates to the user with the raw AI output visible.
-- **E04 (refusal)** must not be retried automatically. Surface a human-readable explanation to the user and suggest switching AI provider if the task is legitimate.
-- **E03 (truncation)** must retry with a shorter task or reduced `length` parameter — not the same payload. Retrying an unchanged truncated task will truncate again.
-- All apps must expose a **manual fallback path**: if automated bridge fails at any point, the user must be able to copy the task, paste it to their AI, and paste the result back by hand.
+- **E04 (refusal)** must not be retried automatically. Surface a human-readable explanation to the user.
+- **E03 (truncation)** must retry with a shorter task or reduced `length` parameter — not the same payload.
+- All apps must expose a **manual fallback path**: if automated bridge fails, the user must be able to copy the task, paste it to their AI, and paste the result back by hand.
 
 ---
 
@@ -305,7 +316,7 @@ RunPack v1.x is a public draft standard. The governance model for this phase is 
 
 - **Steward:** EMVY CHECK holds editorial control over the canonical v1.x spec
 - **Proposals:** Anyone may propose additions. Proposals become candidates once at least one working implementation is publicly demonstrated
-- **Ratification:** Steward approval for MINOR increments. MAJOR increments additionally require at least one independent (non-steward) implementation
+- **Ratification:** Steward approval for MINOR increments. MAJOR increments additionally require at least one independent implementation
 - **Forking:** The spec is open — forks are permitted but must use a distinct name to avoid confusion with canonical RunPack
 
 > **Design principle:** Versioning is infrastructure. The goal is never to lock users to a version — it is to guarantee that any RunPack task written today remains parseable and executable by any compliant tool in five years.
@@ -318,30 +329,28 @@ The base RunPack task format is **stateless by default** — each task is self-c
 
 ### 6.1 — Session envelope
 
-Stateful task sequences are grouped inside a **session envelope**. The envelope carries a `session_id`, a monotonic `turn` counter, and a rolling `history` block. The AI receives the full history on every call within the session.
+Stateful task sequences are grouped inside a **session envelope**. The envelope carries a `session_id`, a monotonic `turn` counter, and a rolling `history` block. The AI receives the relevant history on every call within the session.
 
-```text
-=== RUNPACK_TASK ===
-version:    1.1
-task:       npc_dialogue
-task_id:    npc-001
-session_id: village-quest-42
-turn:       4
-
-history:
-  summary: "Player accepted fishing quest, insulted NPC twice, lost boat."
-  last_result: "NPC warned player not to return without payment."
-
-input:
-  player_message: "I found your boat. It is on fire."
-
-rules:
-  stay_in_character
-  acknowledge_history
-  return_only_npc_reply
-
-output_format: text
-=== END_RUNPACK_TASK ===
+```json
+{
+  "runpack_version": "1.1",
+  "legacy_aip_version": "1.1",
+  "aip_version": "1.1",
+  "packet_type": "runpack_task",
+  "task": "npc_dialogue",
+  "task_id": "npc-001",
+  "session_id": "village-quest-42",
+  "turn": 4,
+  "history": {
+    "summary": "Player accepted fishing quest, insulted NPC twice, lost boat.",
+    "last_result": "NPC warned player not to return without payment."
+  },
+  "input": {
+    "player_message": "I found your boat. It is on fire."
+  },
+  "rules": ["stay_in_character", "acknowledge_history", "return_only_npc_reply"],
+  "output_format": "text"
+}
 ```
 
 ### 6.2 — History compression
@@ -386,24 +395,22 @@ RunPack does not bypass model safety policies. If a model refuses a task, the ap
 
 ## Appendix A — Complete examples
 
-### A.1 — Minimal block task
+### A.1 — Minimal JSON task
 
-```text
-=== RUNPACK_TASK ===
-version: 1.1
-task: document_summary
-
-input:
-  text: [USER_INPUT]
-  The rain in Spain falls mainly on the plain.
-  [/USER_INPUT]
-
-rules:
-  1_sentence
-  plain_language
-
-output_format: text
-=== END_RUNPACK_TASK ===
+```json
+{
+  "runpack_version": "1.1",
+  "legacy_aip_version": "1.1",
+  "aip_version": "1.1",
+  "packet_type": "runpack_task",
+  "task_id": "doc-001",
+  "task": "document_summary",
+  "input": {
+    "text": "[USER_INPUT]\nThe rain in Spain falls mainly on the plain.\n[/USER_INPUT]"
+  },
+  "rules": ["1_sentence", "plain_language"],
+  "output_format": "text"
+}
 ```
 
 ### A.2 — JSON classification task
@@ -411,6 +418,9 @@ output_format: text
 ```json
 {
   "runpack_version": "1.1",
+  "legacy_aip_version": "1.1",
+  "aip_version": "1.1",
+  "packet_type": "runpack_task",
   "task_id": "classify-001",
   "task": "classify",
   "input": {
@@ -432,10 +442,44 @@ output_format: text
 ```json
 {
   "runpack_version": "1.1",
+  "legacy_aip_version": "1.1",
+  "aip_version": "1.1",
+  "packet_type": "runpack_result",
   "task_id": "classify-001",
   "status": "ok",
   "category": "finance",
   "confidence": 0.92,
   "reason": "The item is an invoice and relates to billing."
+}
+```
+
+### A.4 — HumanX claim pressure analysis task
+
+```json
+{
+  "runpack_version": "1.1",
+  "legacy_aip_version": "1.1",
+  "aip_version": "1.1",
+  "packet_type": "runpack_task",
+  "app": "HumanX",
+  "mode": "claim-pressure-analysis",
+  "no_owner_api_used": true,
+  "instruction": "Analyse this claim using only the provided packet and your own reasoning.",
+  "output_contract": {
+    "verdict": "Proven | Strongly Supported | Plausible | Untestable | Weak Evidence | Disproven | Reality Collapse",
+    "evidence_score": "0-100",
+    "testability": "0-100",
+    "survivability": "0-100",
+    "plain_language_summary": "string"
+  },
+  "payload": {
+    "claim": {
+      "claim": "...",
+      "category": "...",
+      "type": "..."
+    },
+    "evidence": [],
+    "pressure": []
+  }
 }
 ```
