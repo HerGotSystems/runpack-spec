@@ -16,6 +16,19 @@ Legacy name: **AIP / AI Prompt Protocol**. Renamed to RunPack for clarity.
 
 ---
 
+## Repository rename status
+
+This repository is ready to be renamed:
+
+```text
+HerGotSystems/aip-protocol
+→ HerGotSystems/runpack-spec
+```
+
+GitHub should preserve redirects after the rename, but public docs now use **RunPack** as the primary name. AIP remains only as the v1.x compatibility layer and in legacy filenames that still need a later file-path migration.
+
+---
+
 ## Start here
 
 - Try the console — generate a task packet in 30 seconds
@@ -30,7 +43,10 @@ Legacy name: **AIP / AI Prompt Protocol**. Renamed to RunPack for clarity.
 ```text
 === RUNPACK_TASK ===
 version: 1.1
-task:    document_summary
+legacy_aip_version: 1.1
+aip_version: 1.1
+packet_type: runpack_task
+task: document_summary
 
 input:
   text: [USER_INPUT]
@@ -97,8 +113,8 @@ RunPack is not:
 
 Early / in-progress use:
 
-- **Omniforge System Forge** — BYO-AI packet workflow
-- **HumanX** — AIP-first claim analysis packets, transitioning to RunPack wording
+- **HumanX** — RunPack-first claim analysis packets with AIP legacy route retained
+- **Omniforge System Forge** — candidate BYO-AI packet workflow for system generation and framework expansion
 
 Add your tool here when it can generate or consume RunPack packets.
 
@@ -109,17 +125,17 @@ Add your tool here when it can generate or consume RunPack packets.
 ```text
 docs/
   index.html          — front door (GitHub Pages entry point)
-  console.html        — interactive task packet generator
-  AIP-landing.html    — legacy public landing page
+  console.html        — interactive RunPack generator
+  AIP-landing.html    — legacy path, RunPack-first landing page
 spec/
-  AIP-v1.1.md         — legacy filename, canonical v1.1 spec until renamed
+  AIP-v1.1.md         — legacy filename, canonical RunPack v1.1 spec until path migration
 examples/
   basic-task.txt      — minimal block format task
   json-mode.json      — JSON mode task and result
   stateful-session.txt — multi-turn session with history
   retry-packet.txt    — retry packets for all six error codes
 reference/
-  AIP-v1.1-spec.html  — rendered legacy spec (open in browser)
+  AIP-v1.1-spec.html  — legacy path, RunPack-first rendered spec
 ```
 
 File names still contain `AIP` during the transition. Public wording is now RunPack.
@@ -140,6 +156,9 @@ File names still contain `AIP` during the transition. Public wording is now RunP
 | `story_generation` | Write a short story |
 | `logic_reasoning` | Work through a problem |
 | `session_summarise` | Compress a conversation history |
+| `claim_pressure_analysis` | Analyse a claim using evidence and pressure points |
+| `system_generation` | Generate a system blueprint from an idea |
+| `framework_expansion` | Expand an existing framework into modules/templates |
 
 Custom types use reverse-domain namespacing:
 
