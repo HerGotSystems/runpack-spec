@@ -1,6 +1,6 @@
 ---
 name: Question
-about: Ask for clarification about AIP behavior or intended usage
+about: Ask for clarification about RunPack behavior or intended usage
 title: "[QUESTION] "
 labels: question
 assignees: ""
