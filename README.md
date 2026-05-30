@@ -1,21 +1,34 @@
-AIP — Artificial Intelligence Prompt Protocol
+# RunPack — task packets for user-run AI
+
 ![Status: Public Draft](https://img.shields.io/badge/status-public_draft-1f6feb)
 ![Version: 1.1](https://img.shields.io/badge/version-1.1-111111)
 ![License: CC BY 4.0](https://img.shields.io/badge/license-CC_BY_4.0-0a7f3f)
-AIP is an open format for AI-agnostic software.
-Apps generate structured tasks.  
+
+**RunPack** is an open packet format for AI-agnostic software.
+
+Apps generate structured task packets.  
 Users run them with any AI they already have.  
-No API keys. No inference costs. No vendor lock-in.
+No app-owner API keys. No public inference costs. No vendor lock-in.
+
+Legacy name: **AIP / AI Prompt Protocol**. Renamed to RunPack for clarity.
+
+> Make a pack. Run it anywhere.
+
 ---
-Start here:
-Try the console — generate a task packet in 30 seconds
-Landing page — what AIP is and why it exists
-Spec — the full protocol specification
-Examples — ready-to-use packet templates
+
+## Start here
+
+- Try the console — generate a task packet in 30 seconds
+- Landing page — what RunPack is and why it exists
+- Spec — the full packet specification
+- Examples — ready-to-use packet templates
+
 ---
-How it works
-```
-=== AI_TASK ===
+
+## How it works
+
+```text
+=== RUNPACK_TASK ===
 version: 1.1
 task:    document_summary
 
@@ -30,66 +43,136 @@ rules:
   no_preamble
 
 output_format: text
-=== END_TASK ===
+=== END_RUNPACK_TASK ===
 ```
+
 1. App generates a packet like this.  
 2. User pastes it into ChatGPT, Claude, Gemini, or any local model.  
 3. Result comes back in a structured format the app can read.
-That's it. No model API. No cost. Works with any AI, now and in the future.
+
+That's it. No model API required by the app. Works with any AI, now and in the future.
+
 ---
-Why this exists
+
+## Why this exists
+
 Most "AI apps" are wrappers around a model API. That creates the same failure pattern every time:
-developer pays per inference
-app inherits vendor risk
-product breaks when APIs change
-user has no say in which AI they trust
-AIP flips the model. The app emits a task. The user's AI executes it. The result comes back structured. The AI is already in the user's pocket — AIP just gives it a job to do.
+
+- developer pays per inference
+- app inherits vendor risk
+- product breaks when APIs change
+- user has no say in which AI they trust
+
+RunPack flips the model.
+
+The app emits a packet. The user's AI executes it. The result comes back structured.
+
+The AI is already in the user's pocket — RunPack just gives it a job to do.
+
 ---
-What's in this repo
-```
+
+## What RunPack is
+
+RunPack is:
+
+- a portable task packet
+- human-readable
+- machine-readable
+- model-independent
+- provider-independent
+- copy-paste friendly
+- useful for BYO-AI workflows
+
+RunPack is not:
+
+- an agent protocol
+- a hosted AI service
+- a model provider
+- a tool-calling framework
+- a replacement for MCP or agent-to-agent protocols
+
+---
+
+## Tools using RunPack
+
+Early / in-progress use:
+
+- **Omniforge System Forge** — BYO-AI packet workflow
+- **HumanX** — AIP-first claim analysis packets, transitioning to RunPack wording
+
+Add your tool here when it can generate or consume RunPack packets.
+
+---
+
+## What's in this repo
+
+```text
 docs/
   index.html          — front door (GitHub Pages entry point)
   console.html        — interactive task packet generator
-  AIP-landing.html    — full public landing page
+  AIP-landing.html    — legacy public landing page
 spec/
-  AIP-v1.1.md         — canonical specification
+  AIP-v1.1.md         — legacy filename, canonical v1.1 spec until renamed
 examples/
   basic-task.txt      — minimal block format task
   json-mode.json      — JSON mode task and result
   stateful-session.txt — multi-turn session with history
   retry-packet.txt    — retry packets for all six error codes
 reference/
-  AIP-v1.1-spec.html  — rendered spec (open in browser)
+  AIP-v1.1-spec.html  — rendered legacy spec (open in browser)
 ```
+
+File names still contain `AIP` during the transition. Public wording is now RunPack.
+
 ---
-Standard task types
-Type	What it does
-`document_summary`	Summarise any document
-`rewrite`	Change the tone or style of text
-`translate`	Translate to any language
-`classify`	Sort an item into your categories
-`lyrics`	Write song lyrics
-`painting_ideas`	Generate visual concepts
-`learning_activity`	Create an activity for a learner
-`story_generation`	Write a short story
-`logic_reasoning`	Work through a problem
-`session_summarise`	Compress a conversation history
-Custom types use reverse-domain namespacing: `com.yourapp.task_name`
+
+## Standard task types
+
+| Type | What it does |
+|---|---|
+| `document_summary` | Summarise any document |
+| `rewrite` | Change the tone or style of text |
+| `translate` | Translate to any language |
+| `classify` | Sort an item into your categories |
+| `lyrics` | Write song lyrics |
+| `painting_ideas` | Generate visual concepts |
+| `learning_activity` | Create an activity for a learner |
+| `story_generation` | Write a short story |
+| `logic_reasoning` | Work through a problem |
+| `session_summarise` | Compress a conversation history |
+
+Custom types use reverse-domain namespacing:
+
+```text
+com.yourapp.task_name
+```
+
 ---
-Contributing
-See CONTRIBUTING.md for the full process.
+
+## Contributing
+
+See `CONTRIBUTING.md` for the full process.
+
 Short version:
-Spec issue? Open a `spec-clarification` or `spec-bug` issue
-New task type? Open a `task-type-proposal` issue — include a working example
-Structural change? Open a `major-proposal` issue — requires independent implementation
+
+- Spec issue? Open a `spec-clarification` or `spec-bug` issue.
+- New task type? Open a `task-type-proposal` issue and include a working example.
+- Structural change? Open a `major-proposal` issue. It requires independent implementation.
+
 ---
-Repo files
-File	Purpose
-CHANGELOG.md	What changed and when
-CONTRIBUTING.md	How to propose changes
-GOVERNANCE.md	Stewardship and decision model
-SECURITY.md	How to report protocol-level risks
-CODE_OF_CONDUCT.md	How we work together
-LICENSE.txt	CC BY 4.0 — free to use and build on
+
+## Repo files
+
+| File | Purpose |
+|---|---|
+| `PROJECT_INDEX.md` | Current project map and rename status |
+| `CHANGELOG.md` | What changed and when |
+| `CONTRIBUTING.md` | How to propose changes |
+| `GOVERNANCE.md` | Stewardship and decision model |
+| `SECURITY.md` | How to report packet/spec-level risks |
+| `CODE_OF_CONDUCT.md` | How we work together |
+| `LICENSE.txt` | CC BY 4.0 — free to use and build on |
+
 ---
+
 Build once. Run with any AI.
